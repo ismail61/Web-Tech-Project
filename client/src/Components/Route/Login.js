@@ -49,10 +49,9 @@ const Login = () => {
                     setError(response.data.message)
                 }
             }else{
-                
+                //console.log(response.data)
                 history.push({
                     pathname : "/",
-                    state : response.data[0].email
                 });
             }
             

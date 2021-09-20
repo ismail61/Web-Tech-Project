@@ -6,12 +6,23 @@ import axios from 'axios'
 import { Modal, Button } from 'react-bootstrap'
 const Main = () => {
     const [notes, setNotes] = useState([])
+    const [loginStatus, setLoginStatus] = useState("")
     const [show, setShow] = useState(false);
     const [id, setId] = useState("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+    useEffect(() => {
+        loadAllNotes();
+    }, []);
+    useEffect(async () => {
+        const login = await axios.get("http://localhost:4444/login")
+        if (login.data.isLogged == true) {
+            setLoginStatus(login.data.user[0].id)
+            console.log(loginStatus)
+        }
+    }, [loginStatus])
     const loadAllNotes = async () => {
         const notes = await axios.get("http://localhost:4444/notes")
         if (notes.data) {
@@ -20,8 +31,8 @@ const Main = () => {
     }
     const addNote = async (note) => {
         const { content, title } = note;
-
-        const response = await axios.post("http://localhost:4444/addnote", {
+        console.log("id "+loginStatus)
+        const response = await axios.post(`http://localhost:4444/addnote/${loginStatus}`, {
             title, content
         })
         if (response.data.err) {
@@ -32,9 +43,6 @@ const Main = () => {
         }
 
     }
-    useEffect(() => {
-        loadAllNotes();
-    }, []);
 
 
     const deleteNote = async (id) => {
@@ -51,19 +59,35 @@ const Main = () => {
         setId(props.note.id)
         handleShow()
     }
+    const doneNote = async (id) => {
+        const response = await axios.put(`http://localhost:4444/notes/done/${id}`)
+        if (response.data.err) {
+            console.log(response.data.err)
+        } else {
+            loadAllNotes()
+        }
+    }
     const updateNote = async (e) => {
         e.preventDefault();
         handleClose()
         if (title && content) {
-            
+
             const response = await axios.put(`http://localhost:4444/notes/${id}`, {
-                title, content
+                title, content ,loginStatus
             })
             if (response.data.err) {
                 console.log(response.data.err)
             } else {
                 loadAllNotes()
             }
+        }
+    }
+    const undoNote = async (id) =>{
+        const response = await axios.put(`http://localhost:4444/notes/undo/${id}`,{userId : loginStatus})
+        if (response.data.err) {
+            console.log(response.data.err)
+        } else {
+            loadAllNotes()
         }
     }
 
@@ -76,7 +100,8 @@ const Main = () => {
                 {notes.map((note, index) => {
                     if (note.title && note.content) {
                         return (
-                            <Card editNote={editNote} deleteNote={deleteNote} id={note.id} note={note} />
+                            <Card doneNote={doneNote} editNote={editNote} deleteNote={deleteNote}
+                             id={note.id} note={note} undoNote={undoNote} />
                         )
                     }
 
