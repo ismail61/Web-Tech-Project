@@ -1,0 +1,12 @@
+.active{
+    color : pink
+}
+.p-2{
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.navbar-brand{
+    font-weight: 600 !important;
+    font-size:27px !important;
+}
