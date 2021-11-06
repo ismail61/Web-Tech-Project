@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import Nav from './Nav'
+import { toast } from 'react-toastify';
 import axios from 'axios'
+import { useHistory } from 'react-router-dom';
 const Login = () => {
+    const ErrorToast = (Msg) => {
+        toast.error(Msg, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+        });
+    }
+    //console.log(process.env.REACT_APP_PASSWORD)
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [passwordError, setpasswordError] = useState("");
     const [emailError, setemailError] = useState("");
-    const history = useHistory();
-    const [err,setError] = useState("")
-    const [user,setUser] = useState("")
     const handleValidation = (event) => {
         let formIsValid = true;
 
@@ -35,32 +44,32 @@ const Login = () => {
 
         return formIsValid;
     };
-
+    const history = useHistory()
     const loginSubmit = async (e) => {
         e.preventDefault();
-        if(handleValidation()){
-            const response = await axios.post("http://localhost:4444/login",{
-                email,password
+        if (handleValidation()) {
+            const response = await axios.post("http://localhost:4444/login", {
+                email, password
             })
-            if(response.data.err || response.data.message){
-                if(response.data.err){
-                    setError(response.data.err)
-                }else{
-                    setError(response.data.message)
+            if (response.data.err || response.data.message) {
+                if (response.data.err) {
+                    ErrorToast(response.data.err)
+                } else {
+                    ErrorToast(response.data.message)
                 }
-            }else{
-                //console.log(response.data)
+            } else {
                 history.push({
-                    pathname : "/",
+                    pathname : `/code/${response.data[0].id}`
                 });
+
             }
-            
+
         }
-        
+
     };
     return (
         <div>
-            <Nav />
+
             <div className="container p-5">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-6">
@@ -72,7 +81,7 @@ const Login = () => {
                                     className="form-control"
                                     name="email"
                                     aria-describedby="emailHelp"
-                                    placeholder="Enter email"
+                                    placeholder="Enter Your Email"
                                     onChange={(event) => setEmail(event.target.value)}
                                 />
                                 <small className="text-danger form-text">
@@ -83,7 +92,7 @@ const Login = () => {
                                 <label>Password</label>
                                 <input
                                     type="password"
-                                    name ="password"
+                                    name="password"
                                     className="form-control"
                                     placeholder="Password"
                                     onChange={(event) => setPassword(event.target.value)}
@@ -101,10 +110,9 @@ const Login = () => {
                         </form>
                     </div>
                 </div>
-                <small className="text-danger form-text">
-                    {err}
-                </small>
+                
             </div>
+            
         </div>
     );
 };

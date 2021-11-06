@@ -51,12 +51,14 @@ const Container = (props) => {
           />
         ) : null}
         <textarea
+        style={{border : '1px solid #C2DBFE',outlineStyle:'1px solid',outlineColor:'#C2DBFE'}}
           value={note.content}
           onClick={expandChange}
           onChange={inputHandler}
           name="content"
           placeholder="Enter Some Note"
-          className=" mb-2 form-control"
+          className="mb-2 p-2 d-flex"
+          cols = '44'
         ></textarea>
         {expand ? (
           <button onClick={addNoteEvent} variant="outlined" className="btn btn-outline-success rounded">

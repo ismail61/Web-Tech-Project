@@ -1,0 +1,17 @@
+
+@import url("https://cdn.syncfusion.com/ej2/material.css");
+
+
+.dark{
+    background-color: #19313C;
+    height : 100vh;
+}
+@media (max-width : 1120px){
+    .dark{
+        height : 100% !important;
+    }
+}
+.light{
+    background-color:  #F4F5F7;
+    height : 100% !important;
+}

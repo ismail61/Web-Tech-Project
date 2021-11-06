@@ -1,23 +1,25 @@
-body{
+body {
     color: #8e9194;
     background-color: #f4f6f9;
 }
+
 .avatar-xl img {
     width: 110px;
 }
+
 .rounded-circle {
     border-radius: 50% !important;
 }
+
 img {
     vertical-align: middle;
     border-style: none;
 }
-.text-muted {
-    color: #aeb0b4 !important;
+
+.badge1 {
+    color: darkcyan !important;
 }
-.text-muted {
-    font-weight: 300;
-}
+
 .form-control {
     display: block;
     width: 100%;
@@ -32,4 +34,29 @@ img {
     border: 1px solid #eef0f3;
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+button:disabled,
+button[disabled] {
+    color : white;
+    padding : 5px 14px;
+    border-radius : 4px;
+    background-color : #0d6efd;
+}
+
+button:disabled:hover,
+button[disabled]:hover {
+    cursor : not-allowed !important;
+}
+
+
+.dark1{
+    background-color: #19313C;
+    height : 100%;
+    color : white;
+}
+
+.light1{
+    background-color:  #F4F5F7;
+    height : 100% !important;
 }

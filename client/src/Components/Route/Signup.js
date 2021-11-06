@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import Nav from './Nav'
 import axios from 'axios'
+import {toast} from 'react-toastify'
 const Signup = () => {
+    const ErrorToast = (Msg) => {
+        toast.error(Msg, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+        });
+    }
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [passwordError, setpasswordError] = useState("");
@@ -45,15 +56,16 @@ const Signup = () => {
             const response = await axios.post("http://localhost:4444/signup", {
                 email, password
             })
-            //console.log(response.data.err)
             if (!response.data.err) {
                 history.push("/login");
+            }else{
+                ErrorToast(response.data.err)
             }
         }
     };
     return (
         <div>
-            <Nav />
+            
             <div className="container p-5">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-6">
@@ -66,7 +78,7 @@ const Signup = () => {
                                     className="form-control"
                                     name="email"
                                     aria-describedby="emailHelp"
-                                    placeholder="Enter email"
+                                    placeholder="Enter Your Email"
                                     onChange={(event) => setEmail(event.target.value)}
                                 />
                                 <small className="text-danger form-text">
