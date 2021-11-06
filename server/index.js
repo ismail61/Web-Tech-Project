@@ -6,12 +6,14 @@ const bodyParser = require('body-parser')
 const db = require('./require/database')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
-const PORT = process.env.PORT || 4444
+
 app.use(cors({
     origin : ["http://localhost:3000"],
     methods : ["GET","POST","PUT","DELETE"],
     credentials : true
 }))
+require('dotenv').config()
+const PORT = process.env.PORT 
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended : true}))
