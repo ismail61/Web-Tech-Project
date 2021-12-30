@@ -62,31 +62,109 @@ function routes(app, db) {
                                 err: "Server Error"
                             })
                         }
-                        res.status(200).json(result);
+                        //res.status(200).json(result);
                         console.log(code)
-                        /* var mailOptions = {
+
+                        var mailOptions = {
                             from: process.env.EMAIL,
                             to: email,
                             subject: 'OTP VERIFICATION',
-                            text: 'OTP : ' + code
+                            html: `<!DOCTYPE html>
+                            <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+                            <head>
+                               <meta charset="utf-8">
+                               <meta name="viewport" content="width=device-width">
+                               <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+                               <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+                               <style>
+                                  p>a{
+                                  border-radius: 5px;
+                                  background: #449D44;
+                                  color: white;
+                                  padding: 5px 10px;
+                                  display: inline-block;
+                                  text-decoration : none;
+                                  font-size: 22px;
+                                  }
+                                  body{
+                                  font-family: 'Lato', sans-serif;
+                                  font-weight: 400;
+                                  font-size: 15px;
+                                  line-height: 1.8;
+                                  }
+                                  a{
+                                  color: #30e3ca;
+                                  text-decoration : none;
+                                  }
+                               </style>
+                            </head>
+                            <body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;">
+                               <center style="width: 100%; background-color: #f1f1f1;">
+                                  <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
+                                  </div>
+                                  <div style="max-width: 600px; margin: 0 auto;">
+                                     <table align="center" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+                                        <tr>
+                                           <td  style="padding: 1em 2.5em 0 2.5em;">
+                                              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                 <tr>
+                                                    <td style="text-align: center;">
+                                                       <h1><a href="#">Email Verify</a></h1>
+                                                    </td>
+                                                 </tr>
+                                              </table>
+                                           </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: center;">
+                                            <b><i class="far fa-envelope fa-5x "></i></b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                           <td style="padding: 2em 0 4em 0; text-align: center;">
+                                              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                 <tr>
+                                                    <td style="text-align: center;">
+                                                       <h2>Please verify your email</h2>
+                                                       <h3>Amazing deals, updates, interesting news right in your inbox</h3>
+                                                       <p><a href="#">${code}</a></p>
+                                                    </td>
+                                                 </tr>
+                                              </table>
+                                           </td>
+                                        </tr>
+                                     </table>
+                                  </div>
+                               </center>
+                            </body>
+                            </html>`
                         };
                         var transporter = nodemailer.createTransport({
+                            host: 'smtp.gmail.com',
+                            host: 'localhost:4444',
+                            port: 465,
+                            secure: true,
                             service: 'gmail',
                             auth: {
                                 user: process.env.EMAIL,
                                 pass: process.env.PASSWORD
-                            }
-                        }); */
-                        /* transporter.sendMail(mailOptions, function (er, info) {
+                            },
+                            tls: {
+                                rejectUnauthorized: false,
+                            },
+                            debug: true
+                        });
+                        transporter.sendMail(mailOptions, function (er, info) {
                             if (er) {
+                                console.log(er)
                                 res.json({
                                     err: "OTP code send Failed !"
                                 })
-                            }else {
+                            } else {
+                                console.log(info.response)
                                 res.status(200).json(result);
                             }
-                        }); */
-
+                        });
                     })
 
                 } else {
@@ -148,6 +226,153 @@ function routes(app, db) {
             }
         )
     })
+    app.post('/notify', (req, res) => {
+
+        const { title, content, userId } = req.body
+        //console.log(title +content)
+        db.query("SELECT email from users where id=?", [userId], (err, result) => {
+            if (err) {
+                console.log(err)
+                res.json({
+                    err: "Server Error"
+                })
+            }
+            //console.log(result[0].email)
+            var mailOptions = {
+                from: process.env.EMAIL,
+                to: result[0].email,
+                subject: 'MyNote Notification',
+                html: `<!DOCTYPE html>
+                <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+                <head>
+                   <meta charset="utf-8">
+                   <meta name="viewport" content="width=device-width">
+                   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+                   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+                   <style>
+                      p>a{
+                      border-radius: 5px;
+                      background: #449D44;
+                      color: white;
+                      padding: 5px 10px;
+                      display: inline-block;
+                      text-decoration : none;
+                      font-size: 22px;
+                      }
+                      body{
+                      font-family: 'Lato', sans-serif;
+                      font-weight: 400;
+                      font-size: 15px;
+                      line-height: 1.8;
+                      }
+                      a{
+                      color: #30e3ca;
+                      text-decoration : none;
+                      }
+                   </style>
+                </head>
+                <body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;">
+                   <center style="width: 100%; background-color: #f1f1f1;">
+                      <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
+                      </div>
+                      <div style="max-width: 600px; margin: 0 auto;">
+                         <table align="center" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+                            <tr>
+                               <td  style="padding: 1em 2.5em 0 2.5em;">
+                                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                     <tr>
+                                        <td style="text-align: center;">
+                                           <h1><a href="#">Note Notification</a></h1>
+                                        </td>
+                                     </tr>
+                                  </table>
+                               </td>
+                            </tr>
+                            <tr>
+                               <td style="text-align: center;">
+                                  <b><i class="fas fa-sticky-note fa-5x "></i></b>
+                               </td>
+                            </tr>
+                            <tr>
+                            <tr>
+                               <td style="padding: 2em 0 4em 0;">
+                                  <div style="padding: 0 2.5em; text-align: center">
+                                     <h4 style=" font-size : 15px">Note Title : <b style="margin:0; color:#30e3ca;  font-size : 18px"> 
+                                        ${title}
+                                     </b></h4>
+                                     <h5 style="margin:0; color:#30e3ca; font-size : 20px">Note Content </h5>
+                                     <hr>
+                                     <h5 style=" margin:0 ; white-space : pre-line ; font-size : 15px">
+                                      ${content}
+                                     </h5>
+                                  </div>
+                               </td>
+                            </tr>
+                            </tr>
+                         </table>
+                      </div>
+                   </center>
+                </body>
+                </html>`
+            };
+            var transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                host: 'localhost:4444',
+                port: 465,
+                secure: true,
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL,
+                    pass: process.env.PASSWORD
+                },
+                tls: {
+                    rejectUnauthorized: false,
+                },
+                debug: true
+            });
+            transporter.sendMail(mailOptions, function (er, info) {
+                if (er) {
+                    console.log(er)
+                    res.json({
+                        err: "Email send Failed !"
+                    })
+                } else {
+                    console.log(info.response)
+                    res.status(200).json(result);
+                }
+            });
+        })
+
+
+    })
+    app.post('/pinnote/:id', (req, res) => {
+        const { userId } = req.body
+        const { id } = req.params
+        db.query("SELECT * from pinnote where userId=?", [userId], (err, result) => {
+            if (err) {
+                res.json({
+                    err: "Server Error"
+                })
+            }
+            //
+            const size = Object.keys(result).length
+            console.log(size)
+            if (size != 0) {
+                res.json({
+                    err: "Already exists a pin note"
+                })
+            } else {
+                db.query("INSERT INTO pinnote values(?,?,?)", [null, userId, id], (err, response) => {
+                    if (err) {
+                        res.json({
+                            err: "Server Error!"
+                        })
+                    }
+                    res.status(200).json(response);
+                })
+            }
+        })
+    })
     app.get('/notes/:id', (req, res) => {
         const { id } = req.params
         db.query("SELECT * FROM notes where userId = ? ORDER BY id DESC", [id],
@@ -161,6 +386,29 @@ function routes(app, db) {
                 }
             }
         )
+    })
+    app.get('/pinnote/:id', (req, res) => {
+        const { id } = req.params
+        db.query("SELECT * from pinnote where userId=?", [id], (err, result) => {
+            if (err) {
+                res.json({
+                    err: "Server Error"
+                })
+            }
+            if (result[0]) {
+                db.query("SELECT * FROM notes where id = ?", [result[0].noteId],
+                    (err, result) => {
+                        if (err) {
+                            res.json({
+                                err: "Server Error"
+                            })
+                        } else {
+                            res.json(result)
+                        }
+                    }
+                )
+            }
+        })
     })
     app.get('/deletenotes/:id', (req, res) => {
         const { id } = req.params
@@ -250,6 +498,29 @@ function routes(app, db) {
                                     })
                                 }
                                 res.json(result)
+                               /*  db.query("SELECT * from pinnote where userId=? and noteId=?", [userId, req.params.id], (ex, pinnote) => {
+                                    if (ex) {
+                                        res.json({
+                                            err: "Server Error"
+                                        })
+                                    }
+                                    console.log(pinnote)
+                                    
+                                db.query("DELETE FROM pinnote WHERE userId=? and noteId=?", [userId, req.params.id],
+                                    (ey, rst) => {
+                                        if (ey) {
+                                            res.json({
+                                                err: "Server Error"
+                                            })
+                                        }
+                                        res.json(result)
+                                    })
+                                    
+                                    res.json(result)
+                                    
+
+                                })  */
+
                             })
 
                 }
@@ -419,47 +690,57 @@ function routes(app, db) {
                     err: "Server Error"
                 })
             }
-            db.query("SELECT * from oldnotes where noteId=? and userId=?", [id, userId], (error2, note2) => {
-                if (error2) {
+            //console.log(note1)
+            if (note1[0]) {
+                if (note1[0].is_done) {
                     res.json({
-                        err: "Server Error"
-                    })
-                }
-                if (!note2[0].title && !note2[0].content && !note2[0].createdAt) {
-                    res.json({
-                        err: "Before Undo Please Edit The Note at least One Time"
+                        err: "Sorry! This note has already become done"
                     })
                 } else {
-                    db.query("UPDATE notes SET title=?,content=?,createdAt=?,updatedAt=?,is_done=? WHERE id = ?",
-                        [note2[0].title, note2[0].content,
-                        note2[0].createdAt, new Date().toLocaleTimeString(),
-                        note2[0].is_done, id],
-                        (err, result) => {
-                            if (err) {
-                                res.json({
-                                    err: "Server Error"
-                                })
-                            }
-                            db.query("UPDATE oldnotes SET title=?,content=?,createdAt=?,updatedAt=?,is_done=? WHERE noteId = ?",
-                                [note1[0].title, note1[0].content,
-                                note1[0].createdAt, new Date().toLocaleTimeString(),
-                                note1[0].is_done, id],
-                                (error, response) => {
-                                    if (error) {
-
+                    db.query("SELECT * from oldnotes where noteId=? and userId=?", [id, userId], (error2, note2) => {
+                        if (error2) {
+                            res.json({
+                                err: "Server Error"
+                            })
+                        }
+                        if (!note2[0].title && !note2[0].content && !note2[0].createdAt) {
+                            res.json({
+                                err: "Before Undo Please Edit The Note at least One Time"
+                            })
+                        } else {
+                            db.query("UPDATE notes SET title=?,content=?,createdAt=?,updatedAt=?,is_done=? WHERE id = ?",
+                                [note2[0].title, note2[0].content,
+                                note2[0].createdAt, new Date().toLocaleTimeString(),
+                                note2[0].is_done, id],
+                                (err, result) => {
+                                    if (err) {
                                         res.json({
                                             err: "Server Error"
                                         })
                                     }
-                                    res.json(result)
+                                    db.query("UPDATE oldnotes SET title=?,content=?,createdAt=?,updatedAt=?,is_done=? WHERE noteId = ?",
+                                        [note1[0].title, note1[0].content,
+                                        note1[0].createdAt, new Date().toLocaleTimeString(),
+                                        note1[0].is_done, id],
+                                        (error, response) => {
+                                            if (error) {
+
+                                                res.json({
+                                                    err: "Server Error"
+                                                })
+                                            }
+                                            res.json(result)
+                                        }
+                                    )
+
                                 }
                             )
-
                         }
-                    )
-                }
 
-            })
+                    })
+                }
+            }
+
         })
     })
 }
