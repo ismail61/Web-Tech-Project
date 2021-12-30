@@ -3,7 +3,20 @@ import { FaTrash, FaEdit } from 'react-icons/fa'
 import {MdDone} from 'react-icons/md'
 import {IoCheckmarkDoneCircleSharp} from 'react-icons/io5'
 import {BiUndo,BiBellPlus} from 'react-icons/bi'
+import {AiFillPushpin} from 'react-icons/ai'
+import { toast } from 'react-toastify';
 const Card = (props) => {
+    const ErrorToast = (Msg) => {
+        toast.error(Msg, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+        });
+    }
     const deleteHandlerNote = () => {
         props.deleteNote(props.id)
     }
@@ -14,13 +27,19 @@ const Card = (props) => {
         props.doneNote(props.id);
     }
     const editNotAlert =()=>{
-        
+        ErrorToast('This note can not be changed now. Because it has become done')
+    }
+    const notDoneHandlerNote = () =>{
+        ErrorToast('This note has already become done')
     }
     const undoHandlerNote = () =>{
         props.undoNote(props.id);
     }
+    const pinHandlerNote = () => {
+        props.pinNote(props.id)
+    }
     const remainderHandlerNote = ()=>{
-        props.remainderNote(props.id)
+        props.remainderNote(props)
     }
     return (
         <div className="col-lg-3 col-md-6 col-sm-12 m-5">
@@ -28,7 +47,7 @@ const Card = (props) => {
                 <div className={"card-header text-dark border-success text-center " + (props.note.is_done ? 'text-decoration-line-through' : '')}>{props.note.title}</div>
                 <div className="card-body text-success">
                     <h5 className="card-title"></h5>
-                    <p className={"card-text " + (props.note.is_done ? 'text-decoration-line-through' : '')}>
+                    <p style={{whiteSpace : 'pre-line'}} className={"card-text " + (props.note.is_done ? 'text-decoration-line-through' : '')}>
                         {props.note.content}
                     </p>
                 </div>
@@ -58,10 +77,9 @@ const Card = (props) => {
                                 </span>
                             </div>
                             <div title={props.note.is_done ? 'Done' : 'Mark as Done'}  className="px-1">
-                                <span onClick={doneHandlerNote}>
+                                <span onClick={props.note.is_done?notDoneHandlerNote:doneHandlerNote}>
                                     <div style={{ color: '#42ba96', cursor: 'pointer' ,fontSize : '20px' }} >
-                                        {props.note.is_done? <IoCheckmarkDoneCircleSharp/> : <MdDone /> }
-                                        
+                                        {props.note.is_done? <IoCheckmarkDoneCircleSharp/> : <MdDone /> }  
                                     </div>
                                 </span>
                             </div>
@@ -72,6 +90,13 @@ const Card = (props) => {
                                     </div>
                                 </span>
                             </div>
+                           {/*  <div title="Pin Note" className="px-1">
+                                <span onClick={pinHandlerNote}>
+                                    <div style={{ color: '#42ba96', cursor: 'pointer' ,fontSize : '22px' }} >
+                                        <AiFillPushpin/> 
+                                    </div>
+                                </span>
+                            </div> */}
                         </div>
                     </div>
                 </div>

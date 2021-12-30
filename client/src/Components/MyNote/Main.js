@@ -11,7 +11,7 @@ import BadgeUnstyled from '@mui/core/BadgeUnstyled';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TrashCard from './TrashCard.js'
 import { Redirect } from 'react-router-dom'
-import {DateTimePickerComponent} from '@syncfusion/ej2-react-calendars'
+import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars'
 import { toast } from 'react-toastify';
 import './Main.css'
 const StyledBadge = styled(BadgeUnstyled)`
@@ -77,9 +77,11 @@ const Main = (props) => {
             progress: undefined,
         });
     }
-    const [timePicker,setTimePicker] = useState(new Date())
-    const [time,setTime] = useState('')
+    const [timePicker, setTimePicker] = useState(new Date())
+    const [time, setTime] = useState('')
+    const [timerProps, setTimerProps] = useState([])
     const [notes, setNotes] = useState([])
+    const [notePin, setPinNote] = useState([])
     const [deleteNotes, setDeleteNotes] = useState([])
     const [show, setShow] = useState(false);
     const [id, setId] = useState("")
@@ -91,15 +93,25 @@ const Main = (props) => {
     const [show2, setShow2] = useState(false);
     const handleClose1 = () => setShow1(false);
     const handleShow1 = () => setShow1(true);
-    const handleClose2 = () => {setShow2(false);}
+    const handleClose2 = () => { setShow2(false); }
     const handleShow2 = () => setShow2(true);
 
     const loadAllNotes = async () => {
         if (props.user) {
             const notes = await axios.get(`http://localhost:4444/notes/${props.user.id}`)
+            
             //console.log(notes)
             if (notes.data) {
                 setNotes(notes.data)
+            }
+        }
+    }
+    const loadPinNote = async () => {
+        if (props.user) {
+            const pinNotes = await axios.get(`http://localhost:4444/pinnote/${props.user.id}`)
+            
+            if (pinNotes.data) {
+                setPinNote(pinNotes.data)
             }
         }
     }
@@ -115,6 +127,7 @@ const Main = (props) => {
     useEffect(() => {
         loadAllNotes();
         loadAllDeleteNotes()
+        loadPinNote()
     }, []);
 
 
@@ -128,6 +141,7 @@ const Main = (props) => {
         } else {
             setNotes([...notes, response.data])
             loadAllNotes()
+            loadPinNote()
         }
 
     }
@@ -138,8 +152,10 @@ const Main = (props) => {
         if (response.data.err) {
             ErrorToast(response.data.err)
         } else {
+            loadPinNote()
             loadAllNotes()
             loadAllDeleteNotes()
+            
         }
     }
     const editNote = async (props) => {
@@ -173,6 +189,7 @@ const Main = (props) => {
         }
     }
     const undoNote = async (id) => {
+
         const response = await axios.put(`http://localhost:4444/notes/undo/${id}`, { userId: props.user.id })
         if (response.data.err) {
             ErrorToast(response.data.err)
@@ -195,7 +212,8 @@ const Main = (props) => {
             } else {
                 await axios.delete(`http://localhost:4444/deletenote/oldnote/${note1.data[0].noteId}`)
                 loadAllNotes();
-                loadAllDeleteNotes()
+                loadAllDeleteNotes();
+                loadPinNote()
             }
         }
     }
@@ -210,21 +228,61 @@ const Main = (props) => {
         } else {
             loadAllDeleteNotes()
             loadAllNotes();
+            loadPinNote();
         }
     }
-    const remainderNote = async (id) => {
-        handleShow2()
-        setTimePicker(new Date())
-        setTime(new Date())
+    const remainderNote = async (props) => {
+
+        if (props.note.is_done) {
+            ErrorToast('Sorry! This note has already become done')
+        }
+        else {
+            setTimerProps(props)
+            handleShow2()
+            setTimePicker(new Date())
+            setTime(new Date())
+        }
     }
-    const timeDatePickerNote = (e)=>{
-        e.preventDefault()
-        console.log(time)
+    const timeDatePickerNote = async (e) => {
+        if (timerProps.note) {
+            e.preventDefault()
+            if (time.getTime() - new Date().getTime() > 0) {
+                //console.log(timerProps.note.is_done)
+                handleClose2()
+                setTimeout(async () => {
+                    if (timerProps.note) {
+                        let response = await axios.post(`http://localhost:4444/notify`, timerProps.note)
+                        if (response.data.err) {
+                            ErrorToast(response.data.err)
+                        } else {
+                            ErrorToast(timerProps.note.title + ' Notification!\n Please check your email for more information about this remainder note')
+                        }
+                    }
+                }, time.getTime() - new Date().getTime());
+            } else {
+                ErrorToast('Incorrect Time/Date Pick')
+            }
+        } else {
+            ErrorToast('Sorry! This note has already become done')
+        }
+
+    }
+    const pinNote = async (id)=> {
+        const response = await axios.post(`http://localhost:4444/pinnote/${id}`, {
+                userId: props.user.id
+        })
+        if (response.data.err) {
+            ErrorToast(response.data.err)
+        } else {
+            loadPinNote()
+            loadAllNotes()
+            loadAllDeleteNotes()
+        }
     }
     if (!props.user) {
         return <Redirect to='/login' />
     } else {
-        
+
         //console.log(props.search)
         const filteredNotes = notes.filter(note => {
             return note.title?.toLowerCase().indexOf(props.search?.toLowerCase()) !== -1;
@@ -237,7 +295,7 @@ const Main = (props) => {
                     {/* <DateTimePickerComponent /> */}
                 </div>
                 {props.user ?
-                    <div className="container-fluid mx-5 mt-5 ">
+                    <div className="container-fluid mx-5 mt-4 ">
                         <Button variant="warning" onClick={handleShow1} className="icon-btn">
                             Trash
                             <StyledBadge badgeContent={Object.keys(deleteNotes).length} overlap="circular">
@@ -261,15 +319,42 @@ const Main = (props) => {
                             </Offcanvas.Body>
                         </Offcanvas>
                     </div> : null}
+                    {(notePin.length>0)?<hr/>:''}
+                {(notePin.length>0)?<center className="text-primary font-weight-bold">Pin Note</center>:''}
                 <div>
                     <div className="row">
-                        {filteredNotes.map((note, index) => {
+                        {notePin.map((note, index) => {
                             if (note.title && note.content) {
                                 return (
-                                    <Card remainderNote={remainderNote} doneNote={doneNote} editNote={editNote} deleteNote={deleteNote}
+                                    <Card pinNote={pinNote} remainderNote={remainderNote} doneNote={doneNote} editNote={editNote} deleteNote={deleteNote}
                                         key={index} id={note.id} note={note} undoNote={undoNote} />
                                 )
                             }
+
+                        })}
+                    </div>
+                </div>
+                {(filteredNotes.length>0)?<hr/>:''}
+                {(filteredNotes.length>0)?<center className="text-primary font-weight-bold">All Notes</center>:''}
+                <div>
+                    <div className="row">
+                        {filteredNotes.map((note, index) => {
+                            if(notePin[0]){
+                                if (note.title && note.content && notePin[0].id!=note.id) {
+                                    return (
+                                        <Card pinNote={pinNote} remainderNote={remainderNote} doneNote={doneNote} editNote={editNote} deleteNote={deleteNote}
+                                            key={index} id={note.id} note={note} undoNote={undoNote} />
+                                    )
+                                }
+                            }else{
+                                if (note.title && note.content) {
+                                    return (
+                                        <Card pinNote={pinNote} remainderNote={remainderNote} doneNote={doneNote} editNote={editNote} deleteNote={deleteNote}
+                                            key={index} id={note.id} note={note} undoNote={undoNote} />
+                                    )
+                                }
+                            }
+                            
 
                         })}
                     </div>
@@ -293,13 +378,15 @@ const Main = (props) => {
                             </div>
                             <div className="form-group p-2">
                                 <label>Content</label>
-                                <input
+                                <textarea
+                                    style={{ border: '1px solid #C2DBFE', outlineStyle: '1px solid', outlineColor: '#C2DBFE' }}
                                     type="text"
                                     name="content"
-                                    className="form-control"
-                                    value={content}
+                                    className="form-control mb-2 p-2 d-flex"
+                                    cols='44'
+                                    rows='45'
                                     onChange={(event) => setContent(event.target.value)}
-                                />
+                                >{content}</textarea>
 
                             </div>
 
@@ -319,14 +406,14 @@ const Main = (props) => {
                         <form id="timeform" onSubmit={timeDatePickerNote}>
                             <div className="form-group p-2">
                                 <label>Set Time & Date</label>
-                                <DateTimePickerComponent 
-                                format="dd-MMM-yy HH:mm"
-                                name="timePicker"
-                                value={timePicker}
-                                onChange={(event) => setTime(event.target.value)
+                                <DateTimePickerComponent
+                                    format="dd-MMM-yy HH:mm"
+                                    name="timePicker"
+                                    value={timePicker}
+                                    onChange={(event) => setTime(event.target.value)
                                     }
-                                min={timePicker}
-                                placeholder = "Please choose a time and date"
+                                    min={timePicker}
+                                    placeholder="Please choose a time and date"
                                 />
 
                             </div>

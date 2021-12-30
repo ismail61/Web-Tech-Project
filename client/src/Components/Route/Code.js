@@ -19,7 +19,6 @@ const Code = () => {
     const otpSubmit = async (e) => {
         e.preventDefault()
         const response = await axios.post("http://localhost:4444/code", { id, otp })
-        //console.log(response.data.id)
         if (response.data.err || response.data.message) {
             if (response.data.err) {
                 ErrorToast(response.data.err)
