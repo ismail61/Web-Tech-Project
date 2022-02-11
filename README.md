@@ -1,2 +1,3 @@
-# Web-Tech-Project
-Node JS->Backend React JS->Frontend  MYSQL -> Database
+# My Note 
+
+Node JS->Backend React JS->Frontend MYSQL -> Database
